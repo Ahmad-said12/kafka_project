@@ -7,11 +7,15 @@ import os
 EXCEL_FILE = "data.xlsx"
 
 def save_to_excel(name: str):
-   
-    if os.path.exists(EXCEL_FILE):
-        wb = load_workbook(EXCEL_FILE)
-        ws = wb.active
-    else:
+    wb = None
+    if os.path.exists(EXCEL_FILE) and os.path.getsize(EXCEL_FILE) > 0:
+        try:
+            wb = load_workbook(EXCEL_FILE)
+            ws = wb.active
+        except Exception:
+            wb = None
+            
+    if wb is None:
         wb = Workbook()
         ws = wb.active
         ws.title = "Items"
