@@ -32,7 +32,7 @@ async def consume():
     try:
         async for msg in consumer:
             data = json.loads(msg.value.decode("utf-8"))
-            save_to_excel(data["name"])
+            await asyncio.to_thread(save_to_excel, data["name"])
     finally:
         await consumer.stop()
 

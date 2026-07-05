@@ -4,15 +4,23 @@ from schemas import ItemCreate
 import json
 
 router = APIRouter()
+producer: AIOKafkaProducer = None
 
-async def send_to_kafka(topic: str, name: str):
+async def init_producer():
+    global producer
     producer = AIOKafkaProducer(bootstrap_servers="localhost:9092")
     await producer.start()
-    try:
-        message = json.dumps({"name": name}).encode("utf-8")
-        await producer.send_and_wait(topic, message)
-    finally:
+
+async def stop_producer():
+    global producer
+    if producer:
         await producer.stop()
+
+async def send_to_kafka(topic: str, name: str):
+    if producer is None:
+        raise RuntimeError("Kafka producer is not initialized")
+    message = json.dumps({"name": name}).encode("utf-8")
+    await producer.send(topic, message)
 
 @router.post("/items")
 async def create_item(item: ItemCreate):
